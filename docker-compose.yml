@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+  monitoring:
+    build: .
+    container_name: monitoring
+    hostname: monitoring
+    image: mvkvl/monitoring
+    volumes:
+        - ./circus.conf:/etc/circus.conf
+        - ./bin:/service/bin
+        - ./lib:/service/lib
+        - ../rig-tools/lib:/service/lib/rig
+        - ./conf:/service/conf
+    ports:
+      - 10080:8080
+    # stdin_open: true
+    # tty: true

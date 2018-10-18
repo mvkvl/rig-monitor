@@ -27,7 +27,8 @@ class RepeatedTimer(object):
                     break
                 cnt = 0
             cnt += 1
-            time.sleep(1)
+            if interval > 0:
+                time.sleep(1)
 
     def start(self):
         self.stopEvent    = threading.Event()

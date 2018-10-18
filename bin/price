@@ -7,8 +7,7 @@ import output.influxdb
 import output.console
 import sys
 from optparse import OptionParser
-from crypto   import PoolBalance   as PoolBalance
-from crypto   import WalletBalance as WalletBalance
+from crypto   import CryptoPrice
 from killer   import GracefulKiller
 from reptimer import RepeatedTimer
 
@@ -19,29 +18,24 @@ class App(object):
     def __init__(self, conf):
         self.config = conf
 
-    def __balance_action(self, config):
-        wb = WalletBalance(config["wallet"]).query()
+    def __blockchain_action(self, config):
+        cp = CryptoPrice(config["price"]).query()
         output.write(conf=config,
-                     data=wb,
-                     save_function=output.influxdb.save_wallet_balance,
-                     metric="balance.wallet")
-        pb = PoolBalance(config["pool"]).query()
-        output.write(conf=config,
-                             data=pb,
-                             save_function=output.influxdb.save_pool_balance,
-                             metric="balance.pool")
-        print("-" * 50)
+                     data=cp,
+                     save_function=output.influxdb.save_crypto_price,
+                     metric="crypto.price")
+        print("-" * 100)
         sys.stdout.flush()
 
     def run(self):
         __killer = GracefulKiller(shutdown_function=self.__shutdown)
-        if self.config.get('wallet'):
+        if self.config.get('price'):
             self.timers.append(
-                RepeatedTimer(interval=config.get_value(self.config, "timers.balance", 600),
-                              function=self.__balance_action,
+                RepeatedTimer(interval=config.get_value(self.config, "timers.price", 600),
+                              function=self.__blockchain_action,
                               args=[self.config])
             )
-            print("~~~ starting balance poller ({} sec)".format(config.get_value(self.config, "timers.balance", 300)))
+            print("~~~ starting price poller ({} sec)".format(config.get_value(self.config, "timers.price", 600)))
         [timer.start() for timer in self.timers]
 
     def __shutdown(self):

@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 
-import conf
+import _conf
 import config
+import output
+import output.influxdb
+import output.console
+import sys
 from optparse import OptionParser
-# from crypto   import PoolBalance         as PoolBalance
-# from crypto   import WalletBalance       as WalletBalance
-# from crypto   import PoolStats           as PoolStats
-# from crypto   import WorkerStats         as WorkerStats
 from crypto   import WorkerStatsCombo    as WorkerStatsCombo
-# from snmp     import NetworkTrafficStats as NetworkTrafficStats
 from killer   import GracefulKiller
 from reptimer import RepeatedTimer
-# import output.influxdb
-# import output.console
 
 class App(object):
 
@@ -23,26 +20,30 @@ class App(object):
 
     def __worker_stats_action(self, config):
         result = WorkerStatsCombo(config["rig"], config["pool"]).query()
-        self.__data_output(conf=config,
-                           data=result,
-                           save_function=output.influxdb.save_worker_stats,
-                           metric="rig.worker")
-        self.__data_output(conf=config,
-                           data=result,
-                           save_function=output.influxdb.save_gpu_stats,
-                           metric="rig.gpu")
-        self.__data_output(conf=config,
-                           data=result,
-                           save_function=output.influxdb.save_pool_worker_stats,
-                           metric="pool.worker")
+        output.write(conf=config,
+                     data=result,
+                     save_function=output.influxdb.save_worker_stats,
+                     metric="rig.worker")
+        output.write(conf=config,
+                     data=result,
+                     save_function=output.influxdb.save_gpu_stats,
+                     metric="rig.gpu")
+        output.write(conf=config,
+                     data=result,
+                     save_function=output.influxdb.save_pool_worker_stats,
+                     metric="pool.worker")
+        print("-" * 50)
+        sys.stdout.flush()
+
     def run(self):
         __killer = GracefulKiller(shutdown_function=self.__shutdown)
         if self.config.get('pool') and self.config.get('rig'):
             self.timers.append(
-                RepeatedTimer(interval=config.get_value(self.config, "timers.stats", 300),
+                RepeatedTimer(interval=config.get_value(self.config, "timers.worker", 300),
                               function=self.__worker_stats_action,
                               args=[self.config])
             )
+            print("~~~ starting workers poller ({} sec)".format(config.get_value(self.config, "timers.worker", 300)))
         [timer.start() for timer in self.timers]
 
     def __shutdown(self):

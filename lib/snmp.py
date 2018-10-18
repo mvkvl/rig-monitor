@@ -29,7 +29,11 @@ class NetworkTrafficStats(object):
                 result[h][intf] = {}
                 for k in self.conf[h]['query'][intf]:
                     result[h][intf][k] = None
-                    result[h][intf][k] = int(globals()["__get_oid"](self.conf[h]['host'],
-                                                                self.conf[h]['community'],
-                                                                self.conf[h]['query'][intf][k])) * 8
+                    val = globals()["get_oid"]( self.conf[h]['host'],
+                                                self.conf[h]['community'],
+                                                self.conf[h]['query'][intf][k])
+                    if val:
+                        result[h][intf][k] = int(val) * 8
+                    else:
+                        result[h][intf][k] = -1
         return result

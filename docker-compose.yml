@@ -11,7 +11,9 @@ services:
         - ./lib:/service/lib
         - ../rig-tools/lib:/service/lib/rig
         - ./conf:/service/conf
-    ports:
-      - 10080:8080
+    # ports:
+    #   - 10080:8080
+    # devices:
+    #   - /dev/gpiomem:/dev/gpiomem
     # stdin_open: true
     # tty: true

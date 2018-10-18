@@ -27,6 +27,8 @@ class PowerAggregator(object):
         query = self.__query("power", "value", "outlet", self.conf["power"]["outlet"])
         v = output.influxdb.read_data(self.conf["output"]["influxdb"], query, "sum")
         if v:
+            if self.conf["power"]["verbose"]:
+                print ("!", end="", file=sys.stdout, flush=True)
             output.influxdb.save_aggregated_power({"outlet": self.conf["power"]["outlet"], "value": v},
                                                    self.conf["output"]["influxdb"], metric="power")
 
@@ -43,18 +45,17 @@ class App(object):
                      data={"outlet": self.conf["power"]["outlet"], "value": 1.0 / F},
                      save_function=output.influxdb.save_power_value,
                      metric="power")
-        if not self.conf["power"]["quiet"]:
+        if self.conf["power"]["verbose"]:
             print ("+", end="", file=sys.stdout, flush=True)
 
 
     def __gpio_action(self, PIN, F, A):
         GPIO.wait_for_edge(PIN, GPIO.FALLING)
         self.n += 1
-        if not self.conf["power"]["quiet"]:
+        if self.conf["power"]["verbose"]:
             print (".", end="", file=sys.stdout, flush=True)
         if self.n == A:
             self.n = 0
-            # print("+")
             threading.Thread(target=self.__report_data, args=([F])).start()
         # time.sleep(1)
 

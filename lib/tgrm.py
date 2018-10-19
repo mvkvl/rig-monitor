@@ -17,15 +17,3 @@ class TelegramSender:
         except (NetworkError, Unauthorized) as err:
             if self.logger:
                 self.logger.error(str(err))
-
-
-
-
-        # if token:
-        #      =
-        # else:
-        #     self.token =
-        # if chat:
-        #     self.chat  = chat
-        # else:
-        #     self.chat  = os.environ.get('TELEGRAM_CHAT', '<default value>')

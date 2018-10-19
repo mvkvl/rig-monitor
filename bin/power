@@ -72,7 +72,7 @@ class App(object):
 
             PIN = self.conf["power"]["pin"]
             A = self.conf["power"]["meter_a"]
-            F = 10
+            F = 100
             self.n = 0
 
             GPIO.setmode(GPIO.BCM)

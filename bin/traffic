@@ -23,7 +23,8 @@ class App(object):
         output.write(conf=config,
                      data=result,
                      save_function=output.influxdb.save_traffic_stats,
-                     metric="net.traffic")
+                     metric="net.traffic",
+                     module=__file__)
         # print("-" * 50)
         sys.stdout.flush()
 

@@ -23,7 +23,8 @@ class App(object):
         output.write(conf=config,
                      data=bc,
                      save_function=output.influxdb.save_blockchain_info,
-                     metric="blockchain.network")
+                     metric="blockchain.network",
+                     module=__file__)
         # print("-" * 100)
         sys.stdout.flush()
 

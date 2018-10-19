@@ -23,7 +23,8 @@ class App(object):
         output.write(conf=config,
                      data=cp,
                      save_function=output.influxdb.save_crypto_price,
-                     metric="crypto.price")
+                     metric="crypto.price",
+                     module=__file__)
         # print("-" * 100)
         sys.stdout.flush()
 

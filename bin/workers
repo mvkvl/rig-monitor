@@ -23,15 +23,18 @@ class App(object):
         output.write(conf=config,
                      data=result,
                      save_function=output.influxdb.save_worker_stats,
-                     metric="rig.worker")
+                     metric="rig.worker",
+                     module=__file__)
         output.write(conf=config,
                      data=result,
                      save_function=output.influxdb.save_gpu_stats,
-                     metric="rig.gpu")
+                     metric="rig.gpu",
+                     module=__file__)
         output.write(conf=config,
                      data=result,
                      save_function=output.influxdb.save_pool_worker_stats,
-                     metric="pool.worker")
+                     metric="pool.worker",
+                     module=__file__)
         # print("-" * 50)
         sys.stdout.flush()
 

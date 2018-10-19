@@ -24,12 +24,14 @@ class App(object):
         output.write(conf=config,
                      data=wb,
                      save_function=output.influxdb.save_wallet_balance,
-                     metric="balance.wallet")
+                     metric="balance.wallet",
+                     module=__file__)
         pb = PoolBalance(config["pool"]).query()
         output.write(conf=config,
                              data=pb,
                              save_function=output.influxdb.save_pool_balance,
-                             metric="balance.pool")
+                             metric="balance.pool",
+                             module=__file__)
         # print("-" * 50)
         sys.stdout.flush()
 

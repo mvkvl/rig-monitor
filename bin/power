@@ -31,7 +31,7 @@ class PowerAggregator(object):
                 print ("!", end="", file=sys.stdout, flush=True)
             output.influxdb.save_aggregated_power({"outlet": self.conf["power"]["outlet"], "value": v},
                                                    self.conf["output"]["influxdb"], metric="power",
-                                                   module="power agg")
+                                                   module="power.a")
             sys.stdout.flush()
 
 class App(object):

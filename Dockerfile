@@ -28,6 +28,7 @@ RUN \
  apt-get autoremove -y                    && \
  apt-get clean                            && \
  rm -rf /var/lib/apt/lists/*              && \
+ find /usr -name '*.pyc' -delete          && \
  echo "Done!"
 
 CMD ["circusd", "/etc/circus.conf"]

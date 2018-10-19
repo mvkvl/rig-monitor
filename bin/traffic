@@ -24,7 +24,7 @@ class App(object):
                      data=result,
                      save_function=output.influxdb.save_traffic_stats,
                      metric="net.traffic")
-        print("-" * 50)
+        # print("-" * 50)
         sys.stdout.flush()
 
     def run(self):

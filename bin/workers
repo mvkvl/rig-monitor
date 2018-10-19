@@ -32,7 +32,7 @@ class App(object):
                      data=result,
                      save_function=output.influxdb.save_pool_worker_stats,
                      metric="pool.worker")
-        print("-" * 50)
+        # print("-" * 50)
         sys.stdout.flush()
 
     def run(self):

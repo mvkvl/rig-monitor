@@ -24,7 +24,7 @@ class App(object):
                      data=bc,
                      save_function=output.influxdb.save_blockchain_info,
                      metric="blockchain.network")
-        print("-" * 100)
+        # print("-" * 100)
         sys.stdout.flush()
 
     def run(self):

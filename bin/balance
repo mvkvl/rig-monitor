@@ -30,7 +30,7 @@ class App(object):
                              data=pb,
                              save_function=output.influxdb.save_pool_balance,
                              metric="balance.pool")
-        print("-" * 50)
+        # print("-" * 50)
         sys.stdout.flush()
 
     def run(self):

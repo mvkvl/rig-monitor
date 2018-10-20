@@ -3,6 +3,7 @@
 import _conf
 import config
 import output
+import logger
 import output.influxdb
 import output.console
 import sys
@@ -12,6 +13,8 @@ from crypto   import WalletBalance as WalletBalance
 from killer   import GracefulKiller
 from reptimer import RepeatedTimer
 
+LOGGING_MODULE="balance.w"
+
 class App(object):
 
     timers = []
@@ -19,19 +22,21 @@ class App(object):
     def __init__(self, conf):
         self.config = conf
 
-    def __balance_action(self, config):
-        wb = WalletBalance(config["wallet"]).query()
-        output.write(conf=config,
+    def __balance_action(self, conf):
+        wb = WalletBalance(conf["wallet"]).query()
+        output.write(conf=conf,
                      data=wb,
                      save_function=output.influxdb.save_wallet_balance,
                      metric="balance.wallet",
-                     module="balance.w")
-        pb = PoolBalance(config["pool"]).query()
-        output.write(conf=config,
-                             data=pb,
-                             save_function=output.influxdb.save_pool_balance,
-                             metric="balance.pool",
-                             module="balance.p")
+                     module=LOGGING_MODULE,
+                     loglevel=conf.get('loglevel') or "ERROR")
+        pb = PoolBalance(conf["pool"]).query()
+        output.write(conf=conf,
+                     data=pb,
+                     save_function=output.influxdb.save_pool_balance,
+                     metric="balance.pool",
+                     module=LOGGING_MODULE,
+                     loglevel=conf.get('loglevel') or "ERROR")
         # print("-" * 50)
         sys.stdout.flush()
 
@@ -43,11 +48,13 @@ class App(object):
                               function=self.__balance_action,
                               args=[self.config])
             )
-            print("~~~ starting balance poller ({} sec)".format(config.get_value(self.config, "timers.balance", 300)))
+            logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+                  .debug("~~~ starting balance poller ({} sec)".format(config.get_value(self.config, "timers.balance", 600)))
         [timer.start() for timer in self.timers]
 
     def __shutdown(self):
-        print("shutdown hook")
+        logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+              .debug("shutdown hook")
         [timer.stop() for timer in self.timers]
 
 

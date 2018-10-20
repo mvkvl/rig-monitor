@@ -5,11 +5,14 @@ import config
 import output
 import output.influxdb
 import output.console
+import logger
 import sys
 from optparse import OptionParser
 from crypto   import BlockchainInfo
 from killer   import GracefulKiller
 from reptimer import RepeatedTimer
+
+LOGGING_MODULE="blockchain"
 
 class App(object):
 
@@ -18,13 +21,14 @@ class App(object):
     def __init__(self, conf):
         self.config = conf
 
-    def __blockchain_action(self, config):
-        bc = BlockchainInfo(config["blockchain"]).query()
-        output.write(conf=config,
+    def __blockchain_action(self, conf):
+        bc = BlockchainInfo(conf["blockchain"]).query()
+        output.write(conf=conf,
                      data=bc,
                      save_function=output.influxdb.save_blockchain_info,
                      metric="blockchain.network",
-                     module="blockchain")
+                     module=LOGGING_MODULE,
+                     loglevel=conf.get('loglevel') or "ERROR")
         # print("-" * 100)
         sys.stdout.flush()
 
@@ -36,11 +40,13 @@ class App(object):
                               function=self.__blockchain_action,
                               args=[self.config])
             )
-            print("~~~ starting blockchain poller ({} sec)".format(config.get_value(self.config, "timers.blockchain", 600)))
+            logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+                  .debug("~~~ starting blockchain poller ({} sec)".format(config.get_value(self.config, "timers.blockchain", 600)))
         [timer.start() for timer in self.timers]
 
     def __shutdown(self):
-        print("shutdown hook")
+        logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+              .debug("shutdown hook")
         [timer.stop() for timer in self.timers]
 
 

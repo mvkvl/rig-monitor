@@ -5,11 +5,14 @@ import config
 import output
 import output.influxdb
 import output.console
+import logger
 import sys
 from optparse import OptionParser
 from snmp     import NetworkTrafficStats as NetworkTrafficStats
 from killer   import GracefulKiller
 from reptimer import RepeatedTimer
+
+LOGGING_MODULE="traffic"
 
 class App(object):
 
@@ -18,13 +21,14 @@ class App(object):
     def __init__(self, conf):
         self.config = conf
 
-    def __net_traffic_action(self, config):
-        result = NetworkTrafficStats(config["traffic"]).query()
-        output.write(conf=config,
+    def __net_traffic_action(self, conf):
+        result = NetworkTrafficStats(conf["traffic"]).query()
+        output.write(conf=conf,
                      data=result,
                      save_function=output.influxdb.save_traffic_stats,
                      metric="net.traffic",
-                     module="traffic")
+                     module=LOGGING_MODULE,
+                     loglevel=conf.get('loglevel') or "ERROR")
         # print("-" * 50)
         sys.stdout.flush()
 
@@ -36,11 +40,13 @@ class App(object):
                               function=self.__net_traffic_action,
                               args=[self.config])
             )
-            print("~~~ starting traffic poller ({} sec)".format(config.get_value(self.config, "timers.traffic", 300)))
+            logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+                  .debug("~~~ starting traffic poller ({} sec)".format(config.get_value(self.config, "timers.traffic", 300)))
         [timer.start() for timer in self.timers]
 
     def __shutdown(self):
-        print("shutdown hook")
+        logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+              .debug("shutdown hook")
         [timer.stop() for timer in self.timers]
         pass
 

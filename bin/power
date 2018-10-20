@@ -5,6 +5,7 @@ import RPi.GPIO as GPIO
 import _conf
 import config
 import output
+import logger
 import output.influxdb
 from optparse import OptionParser
 
@@ -16,6 +17,8 @@ import threading
 import time
 
 class PowerAggregator(object):
+
+    LOGGING_MODULE="power.a"
 
     def __init__(self, conf):
         self.conf = conf
@@ -31,10 +34,13 @@ class PowerAggregator(object):
                 print ("!", end="", file=sys.stdout, flush=True)
             output.influxdb.save_aggregated_power({"outlet": self.conf["power"]["outlet"], "value": v},
                                                    self.conf["output"]["influxdb"], metric="power",
-                                                   module="power.a")
+                                                   module=self.LOGGING_MODULE,
+                                                   loglevel=self.conf.get('loglevel') or "ERROR")
             sys.stdout.flush()
 
 class App(object):
+
+    LOGGING_MODULE="power"
 
     timers = []
 
@@ -47,7 +53,8 @@ class App(object):
                      data={"outlet": self.conf["power"]["outlet"], "value": 1.0 / F},
                      save_function=output.influxdb.save_power_value,
                      metric="power",
-                     module="power")
+                     module=self.LOGGING_MODULE,
+                     loglevel=self.conf.get('loglevel') or "ERROR")
         sys.stdout.flush()
         if self.conf["power"]["verbose"]:
             print ("+", end="", file=sys.stdout, flush=True)
@@ -89,12 +96,14 @@ class App(object):
                               function=self.__gpio_action,
                               args=[PIN, F, A / F])
             )
-            print("~~~ starting power (aggregator) service ({} sec)".format(config.get_value(self.conf, "timers.power", 600)))
+            logger.instance(self.LOGGING_MODULE, self.conf.get('loglevel') or "ERROR")\
+                  .debug("~~~ starting power (aggregator) service ({} sec)".format(config.get_value(self.conf, "timers.power", 600)))
             [timer.start() for timer in self.timers]
 
 
     def __shutdown(self):
-        print("shutdown hook")
+        logger.instance(self.LOGGING_MODULE, self.conf.get('loglevel') or "ERROR")\
+              .debug("shutdown hook")
         [timer.stop() for timer in self.timers]
         GPIO.cleanup()       # clean up GPIO on CTRL+C exit
 

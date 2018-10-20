@@ -5,11 +5,14 @@ import config
 import output
 import output.influxdb
 import output.console
+import logger
 import sys
 from optparse import OptionParser
 from crypto   import WorkerStatsCombo    as WorkerStatsCombo
 from killer   import GracefulKiller
 from reptimer import RepeatedTimer
+
+LOGGING_MODULE="worker"
 
 class App(object):
 
@@ -18,23 +21,26 @@ class App(object):
     def __init__(self, conf):
         self.config = conf
 
-    def __worker_stats_action(self, config):
-        result = WorkerStatsCombo(config["rig"], config["pool"]).query()
-        output.write(conf=config,
+    def __worker_stats_action(self, conf):
+        result = WorkerStatsCombo(conf["rig"], conf["pool"]).query()
+        output.write(conf=conf,
                      data=result,
                      save_function=output.influxdb.save_worker_stats,
                      metric="rig.worker",
-                     module="worker.rig")
-        output.write(conf=config,
+                     module="worker.rig",
+                     loglevel=conf.get('loglevel') or "ERROR")
+        output.write(conf=conf,
                      data=result,
                      save_function=output.influxdb.save_gpu_stats,
                      metric="rig.gpu",
-                     module="worker.gpu")
-        output.write(conf=config,
+                     module="worker.gpu",
+                     loglevel=conf.get('loglevel') or "ERROR")
+        output.write(conf=conf,
                      data=result,
                      save_function=output.influxdb.save_pool_worker_stats,
                      metric="pool.worker",
-                     module="worker.pool")
+                     module="worker.pool",
+                     loglevel=conf.get('loglevel') or "ERROR")
         # print("-" * 50)
         sys.stdout.flush()
 
@@ -46,13 +52,14 @@ class App(object):
                               function=self.__worker_stats_action,
                               args=[self.config])
             )
-            print("~~~ starting workers poller ({} sec)".format(config.get_value(self.config, "timers.worker", 300)))
+            logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+                  .debug("~~~ starting workers poller ({} sec)".format(config.get_value(self.config, "timers.worker", 300)))
         [timer.start() for timer in self.timers]
 
     def __shutdown(self):
-        print("shutdown hook")
+        logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+              .debug("shutdown hook")
         [timer.stop() for timer in self.timers]
-        pass
 
 
 

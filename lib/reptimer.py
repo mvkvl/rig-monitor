@@ -1,5 +1,4 @@
 import threading
-# from threading import Timer,Thread,Event
 import os, time
 import logger
 
@@ -24,6 +23,7 @@ class RepeatedTimer(object):
                     action(*args)
                 except Exception as ex:
                     print (ex)
+                    # self.stop()   # QUESTION
                     break
                 cnt = 0
             cnt += 1
@@ -43,57 +43,6 @@ class RepeatedTimer(object):
         self.actionThread = None
         self.stopEvent    = None
 
-
-class RepeatedTimer2(object):
-
-    def __init__(self, interval, function, args=[]):
-        self.interval = interval
-        self.function = function
-        self.args     = args
-        self.started  = False
-
-    def start(self):
-        print("timer start")
-        if not self.started:
-            self.started  = True
-            self.thread   = Timer(self.interval,self.handle_function)
-            self.thread.start()
-
-    def stop(self):
-        print("timer stop")
-        # if self.started:
-        self.started = False
-        self.thread.cancel()
-
-    def handle_function(self):
-        self.function(*self.args)
-        self.thread = Timer(self.interval,self.handle_function)
-        self.thread.start()
-# class RepeatedTimer2(object):
-#
-#     def __init__(self, interval, function, args=[]):
-#         self.interval = interval
-#         self.function = function
-#         self.args     = args
-#         self.started  = False
-#
-#     def start(self):
-#         print("timer start")
-#         if not self.started:
-#             self.started  = True
-#             self.thread   = Timer(self.interval,self.handle_function)
-#             self.thread.start()
-#
-#     def stop(self):
-#         print("timer stop")
-#         # if self.started:
-#         self.started = False
-#         self.thread.cancel()
-#
-#     def handle_function(self):
-#         self.function(*self.args)
-#         self.thread = Timer(self.interval,self.handle_function)
-#         self.thread.start()
 
 if __name__ == '__main__':
 

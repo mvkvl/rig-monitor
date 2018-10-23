@@ -17,7 +17,7 @@ RUN \
              libssl-dev                         && \
 #
  pip3 install PyYAML urllib3 docutils           && \
- pip3 install influxdb                          && \
+ pip3 install influxdb redis                    && \
  pip3 install pysnmp                            && \
  pip3 install python-daemon                     && \
  pip3 install python-telegram-bot               && \

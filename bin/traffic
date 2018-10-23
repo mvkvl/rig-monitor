@@ -25,7 +25,7 @@ class App(object):
         result = NetworkTrafficStats(conf["traffic"]).query()
         output.write(conf=conf,
                      data=result,
-                     save_function=output.influxdb.save_traffic_stats,
+                     save_function="save_traffic_stats",
                      metric="net.traffic",
                      module=LOGGING_MODULE,
                      loglevel=conf.get('loglevel') or "ERROR")

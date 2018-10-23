@@ -25,7 +25,7 @@ class App(object):
         bc = BlockchainInfo(conf["blockchain"]).query()
         output.write(conf=conf,
                      data=bc,
-                     save_function=output.influxdb.save_blockchain_info,
+                     save_function="save_blockchain_info",
                      metric="blockchain.network",
                      module=LOGGING_MODULE,
                      loglevel=conf.get('loglevel') or "ERROR")

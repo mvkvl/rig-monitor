@@ -26,14 +26,14 @@ class App(object):
         wb = WalletBalance(conf["wallet"]).query()
         output.write(conf=conf,
                      data=wb,
-                     save_function=output.influxdb.save_wallet_balance,
+                     save_function="save_wallet_balance",
                      metric="balance.wallet",
                      module=LOGGING_MODULE,
                      loglevel=conf.get('loglevel') or "ERROR")
         pb = PoolBalance(conf["pool"]).query()
         output.write(conf=conf,
                      data=pb,
-                     save_function=output.influxdb.save_pool_balance,
+                     save_function="save_pool_balance",
                      metric="balance.pool",
                      module=LOGGING_MODULE,
                      loglevel=conf.get('loglevel') or "ERROR")

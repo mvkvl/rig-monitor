@@ -51,7 +51,7 @@ class App(object):
     def __report_data(self, F):
         output.write(conf=self.conf,
                      data={"outlet": self.conf["power"]["outlet"], "value": 1.0 / F},
-                     save_function=output.influxdb.save_power_value,
+                     save_function="save_power_value",
                      metric="power",
                      module=self.LOGGING_MODULE,
                      loglevel=self.conf.get('loglevel') or "ERROR")

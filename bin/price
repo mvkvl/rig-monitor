@@ -25,7 +25,7 @@ class App(object):
         cp = CryptoPrice(conf["price"]).query()
         output.write(conf=conf,
                      data=cp,
-                     save_function=output.influxdb.save_crypto_price,
+                     save_function="save_crypto_price",
                      metric="crypto.price",
                      module=LOGGING_MODULE,
                      loglevel=conf.get('loglevel') or "ERROR")

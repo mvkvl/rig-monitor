@@ -20,12 +20,12 @@ class App(object):
         "hashrate": [
             {"rig.worker":  ["host", "worker"]},
             {"pool.worker": ["pool", "crypto", "worker"]},
-            {"rig.gpu":     ["host", "gpu"]},
+            # {"rig.gpu":     ["host", "gpu"]},
         ],
-        "power": [
-            {"rig.worker":  ["host", "worker"]},
-            {"rig.gpu":     ["host", "gpu"]},
-        ]
+        # "power": [
+            # {"rig.worker":  ["host", "worker"]},
+            # {"rig.gpu":     ["host", "gpu"]},
+        # ]
     }
 
     timers = []
@@ -38,7 +38,7 @@ class App(object):
         for d in ad:
             logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
                   .debug("{} = {}".format(d.get('key'), d.get('value')))
-        output.writeRedis(conf, ad)
+        # output.writeRedis(conf, ad)
 
     def run(self):
         __killer = GracefulKiller(shutdown_function=self.__shutdown)

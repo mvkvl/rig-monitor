@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+
+import _conf
+import config
+import output
+import output.influxdb
+import output.console
+import logger
+import sys
+from optparse import OptionParser
+from killer   import GracefulKiller
+from reptimer import RepeatedTimer
+
+LOGGING_MODULE="aggregator"
+
+class App(object):
+
+    aggregatingPeriods = ["1d", "7d", "30d"]
+    aggregatingValues = {
+        "hashrate": [
+            {"rig.worker":  ["host", "worker"]},
+            {"pool.worker": ["pool", "crypto", "worker"]},
+            {"rig.gpu":     ["host", "gpu"]},
+        ],
+        "power": [
+            {"rig.worker":  ["host", "worker"]},
+            {"rig.gpu":     ["host", "gpu"]},
+        ]
+    }
+
+    timers = []
+
+    def __init__(self, conf):
+        self.config = conf
+
+    def __aggregate_data(self, conf, periods, aggregatingValues):
+        ad = output.influxdb.aggregate_data(conf["output"]["influxdb"], periods, aggregatingValues)
+        for d in ad:
+            logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+                  .debug("{} = {}".format(d.get('key'), d.get('value')))
+        output.writeRedis(conf, ad)
+
+    def run(self):
+        __killer = GracefulKiller(shutdown_function=self.__shutdown)
+        if self.config.get('price'):
+            self.timers.append(
+                RepeatedTimer(interval=config.get_value(self.config, "timers.aggregator", 3600),
+                              function=self.__aggregate_data,
+                              args=[self.config, self.aggregatingPeriods, self.aggregatingValues])
+            )
+            logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+                  .debug("~~~ starting data aggregator ({} sec)".format(config.get_value(self.config, "timers.aggregator", 3600)))
+        [timer.start() for timer in self.timers]
+
+    def __shutdown(self):
+        logger.instance(LOGGING_MODULE, self.config.get('loglevel') or "ERROR")\
+              .debug("shutdown hook")
+        [timer.stop() for timer in self.timers]
+
+if __name__ == '__main__':
+    # gets program arguments
+    def get_program_arguments():
+        parser = OptionParser()
+        parser.add_option("-c", "--config", dest="config",
+                                            help="configuration file")
+        (options, arguments) = parser.parse_args()
+        return options, arguments
+    opts, args = get_program_arguments()
+    if not opts.config:
+        raise ValueError("configuration file argument not passed")
+
+    App(config.read(opts.config)).run()

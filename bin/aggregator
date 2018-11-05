@@ -20,12 +20,15 @@ class App(object):
         "hashrate": [
             {"rig.worker":  ["host", "worker"]},
             {"pool.worker": ["pool", "crypto", "worker"]},
-            # {"rig.gpu":     ["host", "gpu"]},
+            {"rig.gpu":     ["host", "gpu"]},
         ],
-        # "power": [
-            # {"rig.worker":  ["host", "worker"]},
-            # {"rig.gpu":     ["host", "gpu"]},
-        # ]
+        "power": [
+            {"rig.worker":  ["host", "worker"]},
+            {"rig.gpu":     ["host", "gpu"]},
+        ],
+        "temperature": [
+            {"rig.gpu":     ["host", "gpu"]},
+        ]
     }
 
     timers = []
